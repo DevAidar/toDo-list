@@ -151,6 +151,31 @@ for (var i = 1; i < 5; i++) {
     listOfItems.appendChild(item);
 }
 
+// grab all elements with class .delete-button
+let deleteButtons = document.querySelectorAll(".delete-button");
+
+
+// grab all elements with class .update-button
+let updateButtons = document.querySelectorAll(".update-button");
+
+let todoItemToUpdate = () => {
+    deleteButtons = document.querySelectorAll(".delete-button");
+    deleteButtons.forEach((deleteButton, i) => {
+        deleteButton.addEventListener('click', (event) => {
+            deletingButton(deleteButton);
+        });
+    });
+
+    updateButtons = document.querySelectorAll(".update-button");
+    updateButtons.forEach((updateButton, i) => {
+        updateButton.addEventListener('click', (event) => {
+            updateItem(updateButton);
+        });
+    });
+}
+
+todoItemToUpdate();
+
 
 //// ***************** EVENTS *****************
 
@@ -161,33 +186,36 @@ for (var i = 1; i < 5; i++) {
 
 // Add event listener to submit button which handles adding user's todo items to list
 submitBtn.addEventListener('click', (event) => {
+    if (submitBtn.value == 'Submit') {
+        // Grab input field where user's to do item is entered
+        let toDo = document.querySelector('#item-to-add');
+        if (toDo.value != "") {
+            // Create li element
+            let li = document.createElement('li');
+            li.className = "list-group-item";
 
-    // Grab input field where user's to do item is entered
-    let toDo = document.querySelector('#item-to-add');
-    if (toDo.value != "") {
-        // Create li element
-        let li = document.createElement('li');
-        li.className = "list-group-item";
+            // Add users input to li element
+            li.innerHTML = toDo.value;
 
-        // Add users input to li element
-        li.innerHTML = toDo.value;
+            // Append delete button and update button
+            var deleteButton = document.createElement('BUTTON');
+            deleteButton.className = "btn btn-danger btn-xs pull-right delete-button";
+            deleteButton.style.marginLeft = "5px";
+            deleteButton.innerHTML = "x";
 
-        // Append delete button and update button
-        var deleteButton = document.createElement('BUTTON');
-        deleteButton.className = "btn btn-danger btn-xs pull-right delete-button";
-        deleteButton.style.marginLeft = "5px";
-        deleteButton.innerHTML = "x";
+            var updateButton = document.createElement('BUTTON');
+            updateButton.className = "btn btn-info btn-xs pull-right update-button";
+            updateButton.innerHTML = "&#x21bb";
 
-        var updateButton = document.createElement('BUTTON');
-        updateButton.className = "btn btn-info btn-xs pull-right update-button";
-        updateButton.innerHTML = "&#x21bb";
+            li.appendChild(deleteButton);
+            li.appendChild(updateButton);
 
-        li.appendChild(deleteButton);
-        li.appendChild(updateButton);
+            // Append new item to list of items
+            listOfItems.appendChild(li);
+            toDo.value = "";
 
-        // Append new item to list of items
-        listOfItems.appendChild(li);
-        toDo.value = "";
+            todoItemToUpdate();
+        }
     }
 });
 
@@ -196,28 +224,19 @@ submitBtn.addEventListener('click', (event) => {
  //                  Delete item                  //
 ///////////////////////////////////////////////////
 
-// grab all elements with class .delete-button
-let deleteButtons = document.querySelectorAll(".delete-button");
-
 // Create a function that handles removing an item from list
 const deletingButton = (deleteButton) => {
     deleteButton.parentNode.remove();
+    todoItemToUpdate();
 };
 
 // Add the remove item event listener to existing to do items
-deleteButtons.forEach((deleteButton, i) => {
-    deleteButton.addEventListener('click', (event) => {
-        deletingButton(deleteButton);
-    });
-});
+
 
 
   ///////////////////////////////////////////////////
  //                  Update item                  //
 ///////////////////////////////////////////////////
-
-// grab all elements with class .update-button
-let updateButtons = document.querySelectorAll(".update-button");
 // console.log(updateButtons);
 
 // Declare global variable to handle updating a list item's value; this var will hold the parent element of text to be updated;
@@ -226,26 +245,21 @@ let updateButtons = document.querySelectorAll(".update-button");
 // Create function to handle updating an item from list
 let updateItem = (updateButton) => {
     let toDo = document.querySelector('#item-to-add');
-    if (toDo.value != "" && submitBtn.value != "Save") {
+    if (toDo.value == '' && submitBtn.value != "Save") {
         // Grab parent element of update button - which is a li element
         let li = updateButton.parentNode;
+        li.className = "list-group-item changing";
 
         // Select the child node if it's a text element
-        li.firstChild.textContent = toDo.value;
-        toDo.value = "";
+        toDo.value = li.firstChild.textContent;
 
         // change submit button to save button
-        console.log(submitBtn.attribute);
         submitBtn.value = "Save";
     }
 };
 
 // Add updateItem event listener to update buttons already existing on page load.
-updateButtons.forEach((updateButton, i) => {
-    updateButton.addEventListener('click', (event) => {
-        updateItem(updateButton);
-    });
-});
+
 
   ///////////////////////////////////////////////////
  //                   Save item                   //
@@ -255,25 +269,44 @@ updateButtons.forEach((updateButton, i) => {
 
 // Save item event listener
 var saveUpdatedTodo = function(event) {
-
     // Targets the input value, where todo is updated
+    let input = document.querySelector('#item-to-add');
 
         // Target the item to update with new value
+        let item = document.querySelector('.list-group-item', '.changing');
+        item.firstChild.textContent = input.value;
+        item.className = "list-group-item";
         // Use todoItemToUpdate, the global variable we set when selecting item to update ( li element )
+        todoItemToUpdate();
 
         // Append delete button and update button
 
         // grab delete button so that we can reappend remove item event listener
+        // let deleteButton = item.firstElementChild;
 
         // grab update button such that we can reappend update item event listener
+        // let updateButton = item.lastElementChild;
 
         // Add the remove item event listener
+        // deleteButton.addEventListener('click', (event) => {
+        //     deletingButton(deleteButton);
+        // });
 
         // Add the update item event listener
+        // updateButton.addEventListener('click', (event) => {
+        //     updateItem(updateButton);
+        // });
 
         // Clear user's to do item from input field
+        input.value = "";
 
         // change save button to submit button
+        submitBtn.value = "Submit";
 }
 
 // Add event listener to save button
+submitBtn.addEventListener('click', (event) => {
+    if (submitBtn.value == "Save") {
+        saveUpdatedTodo(event);
+    }
+});
